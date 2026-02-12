@@ -1,6 +1,6 @@
 import streamlit as st
 def draw_grid(robot, goal=(5,5), size=6):
-grid = np.zeros((size, size))
+  grid = np.zeros((size, size))
 
 
 # robot ve hedef işaretleme
@@ -99,3 +99,4 @@ if (robot.x, robot.y) == goal:
 st.success("🎯 Hedefe ulaşıldı!")
 else:
 st.error("❌ Hedef kaçtı, tekrar dene!")
+
