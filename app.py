@@ -1,93 +1,85 @@
 import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
-import time
+for i in range(size):
+for j in range(size):
+ax.text(j, i, "",
+ha="center", va="center")
 
 
-class Robot:
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-
-    def move(self, cmd):
-        if cmd == "forward": self.y += 1
-        elif cmd == "right": self.x += 1
-        elif cmd == "left": self.x -= 1
+ax.set_xticks(range(size))
+ax.set_yticks(range(size))
+ax.grid(True)
+st.pyplot(fig)
 
 
-LEVELS = {
-    1: {"goal": (3, 3), "obstacles": []},
-    2: {"goal": (4, 4), "obstacles": [(2, 2), (1, 3)]},
-    3: {"goal": (5, 5), "obstacles": [(2, 2), (3, 2), (2, 3)]},
-}
+# ---------------- SESSION STATE ----------------
 
 
-def draw_grid(robot, level, size=6):
-    data = LEVELS[level]
-    goal = data["goal"]
-    obstacles = data["obstacles"]
-    grid = np.zeros((size, size))
-
-    for ox, oy in obstacles: grid[oy][ox] = -1
-
-    if 0 <= robot.y < size and 0 <= robot.x < size: grid[robot.y][robot.x] = 1
-
-    grid[goal[1]][goal[0]] = 2
-
-    fig, ax = plt.subplots()
-    ax.imshow(grid)
-    ax.set_xticks(range(size))
-    ax.set_yticks(range(size))
-    ax.grid(True)
-    st.pyplot(fig)
+if "blocks" not in st.session_state:
+st.session_state.blocks = []
 
 
-if "blocks" not in st.session_state: st.session_state.blocks = []
-if "score" not in st.session_state: st.session_state.score = 0
+st.title("🧩 Kod Blok Robot Atölyesi")
 
 
-st.title("Kod Blok Robot Oyunu")
+# ---------------- BLOK SEÇİM PANELİ ----------------
 
-level = st.selectbox("Seviye Sec", [1, 2, 3])
+
+st.subheader("1️⃣ Blokları Seç")
+
 
 col1, col2, col3 = st.columns(3)
 
-if col1.button("Forward"): st.session_state.blocks.append("forward")
-if col2.button("Right"): st.session_state.blocks.append("right")
-if col3.button("Left"): st.session_state.blocks.append("left")
 
-st.write("Algoritma:", " -> ".join(st.session_state.blocks))
+if col1.button("⬆ İleri"):
+st.session_state.blocks.append("⬆ İleri")
+
+
+if col2.button("➡ Sağ"):
+st.session_state.blocks.append("➡ Sağ")
+
+
+if col3.button("⬅ Sol"):
+st.session_state.blocks.append("⬅ Sol")
+
+
+# ---------------- BLOK SIRASI (SCRATCH TARZI) ----------------
+
+
+st.subheader("2️⃣ Algoritma Zinciri")
+
+
+st.write(" → ".join(st.session_state.blocks) if st.session_state.blocks else "Henüz blok yok")
+
 
 col4, col5 = st.columns(2)
 
-if col4.button("Temizle"): st.session_state.blocks = []
 
-if col5.button("Calistir"):
-    robot = Robot()
-    data = LEVELS[level]
-    goal = data["goal"]
-    obstacles = data["obstacles"]
-    placeholder = st.empty()
-    crashed = False
+if col4.button("🗑 Temizle"):
+st.session_state.blocks = []
 
-    for cmd in st.session_state.blocks:
-        robot.move(cmd)
 
-        if (robot.x, robot.y) in obstacles:
-            crashed = True
-            break
+# ---------------- ANİMASYON ----------------
 
-        with placeholder.container(): draw_grid(robot, level)
 
-        time.sleep(0.5)
+st.subheader("3️⃣ Simülasyonu Çalıştır")
 
-    if crashed:
-        st.error("Engele carptin!")
-    elif (robot.x, robot.y) == goal:
-        gained = max(10 - len(st.session_state.blocks), 1)
-        st.session_state.score += gained
-        st.success(f"Hedefe ulasildi! +{gained} puan")
-    else:
-        st.warning("Hedefe ulasilamadi")
 
-st.subheader(f"Toplam Skor: {st.session_state.score}")
+if col5.button("▶ Çalıştır"):
+robot = Robot()
+goal = (5,5)
+
+
+placeholder = st.empty()
+
+
+for cmd in st.session_state.blocks:
+robot.move(cmd)
+with placeholder.container():
+draw_grid(robot, goal)
+time.sleep(0.6)
+
+
+if (robot.x, robot.y) == goal:
+st.success("🎯 Hedefe ulaşıldı!")
+else:
+st.error("❌ Hedef kaçtı, tekrar dene!")
